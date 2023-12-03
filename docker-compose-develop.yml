@@ -1,0 +1,31 @@
+services:
+  frontend-builder:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - static:/app/dist
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend/src:/app
+    ports:
+      - "5100:5100"
+  postgres:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgres/pg_data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - static:/html
+      - ./nginx/conf:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+volumes:
+  pg_data:
+  static:
