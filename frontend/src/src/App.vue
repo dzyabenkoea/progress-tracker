@@ -30,6 +30,10 @@ function addTracker() {
   });
 }
 
+function removeTracker(tracker) {
+  trackers.value = trackers.value.filter(el => el.id !== tracker.id)
+}
+
 onMounted(async () => {
   const response = await fetch("http://127.0.0.1:8000/api/trackers", { method: "GET" });
   if (response.status === 200) {
@@ -49,6 +53,7 @@ onMounted(async () => {
             @add-success="addSuccess(tracker)"
             @add-failure="addFailure(tracker)"
             @remove-last-commit="removeLastCommit(tracker)"
+            @remove="removeTracker(tracker)"
           />
         </template>
       </div>
