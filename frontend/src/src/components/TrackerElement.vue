@@ -19,7 +19,8 @@ const titleInput = ref<HTMLInputElement>()
 const isDragging = ref(false)
 const leftPositioning = computed(() => {
   const maxOffset = 100
-  const newPositionStyling = currentOffsetDiff.value <= maxOffset ? currentOffsetDiff.value : maxOffset
+  const newPositionStyling =
+    currentOffsetDiff.value <= maxOffset ? currentOffsetDiff.value : maxOffset
   console.log('Сдвиг:', newPositionStyling)
 
   return `-${newPositionStyling}px`
@@ -38,7 +39,7 @@ function onTitleClick() {
   })
 }
 
-function onTrackerDrag(event: DragEvent) {
+function startDrag(event: DragEvent) {
   console.log('drag')
   isDragging.value = true
 
@@ -47,7 +48,7 @@ function onTrackerDrag(event: DragEvent) {
   console.log(offsetX, offsetY)
 }
 
-function onTrackerDrop(event) {
+function onTrackerDrop() {
   console.log('drop')
   isDragging.value = false
 
@@ -69,14 +70,19 @@ watch(isDragging, () => {
   if (isDragging.value === true) trackerContainer.value.addEventListener('mousemove', onMouseMove)
   else trackerContainer.value.removeEventListener('mousemove', onMouseMove)
 })
+
+onMounted(() => {
+  document.addEventListener('mouseup', () => {
+    onTrackerDrop()
+  })
+})
 </script>
 
 <template>
-  <div class="relative" ref="trackerContainer" @mousedown="onTrackerDrag">
+  <div class="relative" ref="trackerContainer" @mousedown="startDrag" @dragstart.prevent>
     <article
       class="z-20 relative rounded-md px-3 py-2 flex flex-col gap-2 shadow bg-sky-900 bg-gradient-to-b from-sky-800 to-sky-900"
       :style="{ left: leftPositioning }"
-      @mouseup="onTrackerDrop"
     >
       <div class="flex">
         <div class="flex flex-col grow gap-2 pr-2">
@@ -141,7 +147,8 @@ watch(isDragging, () => {
     </article>
     <div
       class="z-10 p-4 bg-red-500 rounded-md absolute right-0 top-0 text-white h-full flex items-center cursor-pointer"
-     @click="emits('remove')">
+      @click="emits('remove')"
+    >
       <p>Удалить</p>
     </div>
   </div>
