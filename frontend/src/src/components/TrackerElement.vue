@@ -2,6 +2,9 @@
 import { ArrowUturnLeftIcon, CheckIcon, MinusIcon } from '@heroicons/vue/24/outline'
 import { computed, onMounted, ref, watch } from 'vue'
 
+/**
+ * @property {Tracker} tracker
+ */
 const props = defineProps<{ tracker: { name: string; points: boolean[] } }>()
 const emits = defineEmits(['add-success', 'add-failure', 'remove-last-commit', 'remove'])
 const titleIsEditable = ref(false)
@@ -15,6 +18,7 @@ const wins = computed(() => {
   return wins.length
 })
 const titleInput = ref<HTMLInputElement>()
+const topMovingContainer = ref<HTMLInputElement>()
 
 const isDragging = ref(false)
 const leftPositioning = computed(() => {
@@ -66,21 +70,47 @@ function onMouseMove(event: MouseEvent) {
   currentOffsetDiff.value = offsetX - event.offsetX
 }
 
+function onTouchMove(event: TouchEvent) {
+  const touch = event.touches[0]
+  console.log('onTouchMove')
+  console.log(offsetX, offsetY)
+  console.log(touch.screenX, touch.screenX)
+  currentOffsetDiff.value = offsetX - touch.screenX
+}
+
 watch(isDragging, () => {
-  if (isDragging.value === true) trackerContainer.value.addEventListener('mousemove', onMouseMove)
-  else trackerContainer.value.removeEventListener('mousemove', onMouseMove)
+  if (isDragging.value === true) {
+    {
+      trackerContainer.value.addEventListener('mousemove', onMouseMove)
+      trackerContainer.value.addEventListener('touchmove', onTouchMove)
+    }
+  } else {
+    trackerContainer.value.removeEventListener('mousemove', onMouseMove)
+    trackerContainer.value.removeEventListener('touchmove', onTouchMove)
+  }
 })
 
 onMounted(() => {
   document.addEventListener('mouseup', () => {
     onTrackerDrop()
   })
+  document.addEventListener('touchend', () => {
+    onTrackerDrop()
+  })
 })
 </script>
 
 <template>
-  <div class="relative" ref="trackerContainer" @mousedown="startDrag" @dragstart.prevent>
+  <div
+    class="relative"
+    ref="trackerContainer"
+    @mousedown="startDrag"
+    @touchstart="startDrag"
+    @touchend.prevent
+    @dragstart.prevent
+  >
     <article
+      ref="topMovingContainer"
       class="z-20 relative rounded-md px-3 py-2 flex flex-col gap-2 shadow bg-sky-900 bg-gradient-to-b from-sky-800 to-sky-900"
       :style="{ left: leftPositioning }"
     >
